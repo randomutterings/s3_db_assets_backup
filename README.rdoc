@@ -1,6 +1,6 @@
 = S3DbAssetsBackup
 
-Generates rake tasks for backing up your database and public folder (which should also contain any uploaded assets) to an existing bucket in your Amazon S3 account.  The rake tasks compresses and uploads each backup with a time stamp and the config file allows you to set how many of each backup to keep.  This script is "very largly based on" the following (http://www.magnionlabs.com/2009/7/7/db-backups)
+Generates rake tasks for backing up your database and public folder (which should also contain any uploaded assets) to an existing bucket in your Amazon S3 account.  The rake tasks compresses and uploads each backup with a time stamp and the config file allows you to set how many of each backup to keep.  This script is "very largly based on" the following (http://www.magnionlabs.com/2009/7/7/db-backups).
 
 == Install
 

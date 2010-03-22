@@ -40,7 +40,7 @@ spec = Gem::Specification.new do |s|
   s.files = PKG_FILES.to_a
   s.require_path = "lib"
   s.has_rdoc = false
-  s.extra_rdoc_files = ["README"]
+  s.extra_rdoc_files = ["README.rdoc"]
 end
 
 desc 'Turn this plugin into a gem.'
