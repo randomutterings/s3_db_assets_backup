@@ -1,0 +1,65 @@
+= S3DbAssetsBackup
+
+Generates rake tasks for backing up your database and public folder (which should also contain any uploaded assets) to an existing bucket in your Amazon S3 account.  The rake tasks compresses and uploads each backup with a time stamp and the config file allows you to set how many of each backup to keep.  This script is "very largly based on" the following (http://www.magnionlabs.com/2009/7/7/db-backups)
+
+== Install
+
+  script/plugin install git://github.com/randomutterings/s3_db_assets_backup.git
+
+or
+
+  gem install s3_db_assets_backup
+  
+Edit config/assets_backup_config.yml with your aws credentials.
+
+Install aws-s3 library
+
+  gem install aws-s3
+  
+== Create the backup rake tasks, config file, and initializer.
+
+  script/generate assets_backup
+
+Backup the production database.
+
+  rake db:backup RAILS_ENV=production
+
+Backup the public folder
+
+  rake assets:backup
+
+Optionally setup cron to do your backups with the following crontab
+
+  # Full backup every Wednesday at 11:01
+  1 23 * * 3  cd /path/to/your/project && /var/lib/gems/1.8/bin/rake db:backup RAILS_ENV=production
+  1 23 * * 3  cd /path/to/your/project && /var/lib/gems/1.8/bin/rake assets:backup
+
+If you ever need to restore the production database, use the tool of your choice to download the backup from S3 and run.
+
+  gzip -dc production_dump-YYYY-MM-DD_HH-MM-SS.sql.gz | mysql -u root -p <production database>
+
+Copyright (c) 2010 Chris Barnes, released under the MIT license
+  
+== Troubleshooting and FAQs
+
+<b>I get "cannot create ./tmp/production_dump-YYYY-MM-DD_HH-MM-SS.sql.gz: Directory nonexistent" when running the database backup to S3</b>
+
+You need to create a tmp directory in the root.
+
+  mkdir tmp
+
+<b>Another problem?</b>
+
+Make sure you're using Rails 2.3.5.
+
+
+== Found a bug?
+
+If you are having a problem with the site, first look at the FAQs above. If you still cannot resolve it, please submit an issue here.
+
+http://github.com/randomutterings/s3_db_assets_backup/issues
+
+
+== Rails 3
+
+This project does not yet officially work with Rails 3.

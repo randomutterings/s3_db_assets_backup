@@ -8,4 +8,4 @@ bucket: your_existing_s3_bucket
 # how many backups would you like to keep for
 # the database and public folder
 database_backups_to_keep: 8
-asset_backups_to_keep: 3
+assets_backups_to_keep: 3

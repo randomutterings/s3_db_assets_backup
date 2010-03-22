@@ -1,8 +1,11 @@
 Description:
-    Explain the generator
+    generates backup rake tasks, config yaml file, and initializer
 
 Example:
-    ./script/generate s3_db_assets_backup Thing
+    ./script/generate assets_backup
 
     This will create:
-        what/will/it/create
+        lib/tasks/assets_backup.rake
+        lib/tasks/db_backup.rake
+        config/assets_backup_config.yml
+        config/initializers/load_assets_backup_config.rb

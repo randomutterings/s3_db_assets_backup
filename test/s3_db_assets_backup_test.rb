@@ -5,10 +5,9 @@ require 'rails_generator/scripts/generate'
 class S3DbAssetsBackupTest < Test::Unit::TestCase
 
   def setup
-    FileUtils.mkdir_p(fake_rails_root)
-    FileUtils.mkdir_p(config_dir)
-    @original_root_files = root_file_list
-    @original_config_files = config_file_list
+    # creates all dirs down to initializers and tasks
+    FileUtils.mkdir_p(initializers_dir)
+    FileUtils.mkdir_p(tasks_dir)
     Rails::Generator::Scripts::Generate.new.run(["assets_backup"], :destination => fake_rails_root)
   end
 
@@ -16,9 +15,20 @@ class S3DbAssetsBackupTest < Test::Unit::TestCase
     FileUtils.rm_r(fake_rails_root)
   end
 
-  def test_generates_config_yaml_file
-    new_file = (config_file_list - @original_config_files).first
-    assert_equal "backup_config.yml", File.basename(new_file)
+  def test_generates_backup_config_yaml_file
+    assert_generated_file("config/assets_backup_config.yml")
+  end
+  
+  def test_generates_backup_config_initializer
+    assert_generated_file("config/initializers/load_assets_backup_config.rb")
+  end
+  
+  def test_generates_assets_backup_rake_task
+    assert_generated_file("lib/tasks/assets_backup.rake")
+  end
+  
+  def test_generates_db_backup_rake_task
+    assert_generated_file("lib/tasks/db_backup.rake")
   end
   
   private
@@ -30,13 +40,28 @@ class S3DbAssetsBackupTest < Test::Unit::TestCase
     def config_dir
       File.join(File.dirname(__FILE__), 'rails_root/config')
     end
-
-    def root_file_list
-      Dir.glob(File.join(fake_rails_root, "*"))
+    
+    def initializers_dir
+      File.join(File.dirname(__FILE__), 'rails_root/config/initializers')
     end
     
-    def config_file_list
-      Dir.glob(File.join(config_dir, "*"))
+    def tasks_dir
+      File.join(File.dirname(__FILE__), 'rails_root/lib/tasks')
+    end
+    
+    # Asserts that the given file was generated.
+    # The contents of the file is passed to a block.
+    def assert_generated_file(path)
+      assert_file_exists(path)
+      File.open("#{fake_rails_root}/#{path}") do |f|
+        yield f.read if block_given?
+      end
+    end
+
+    # asserts that the given file exists
+    def assert_file_exists(path)
+      assert File.exist?("#{fake_rails_root}/#{path}"),
+        "The file '#{fake_rails_root}/#{path}' should exist"
     end
 
 end
