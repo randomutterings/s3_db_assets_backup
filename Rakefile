@@ -1,6 +1,7 @@
 require 'rake'
 require 'rake/testtask'
 require 'rake/rdoctask'
+require 'rake/gempackagetask'
 
 desc 'Default: run unit tests.'
 task :default => :test
@@ -25,9 +26,6 @@ end
 PKG_FILES = FileList[
   '[a-zA-Z]*',
   'generators/**/*',
-  'lib/**/*',
-  'rails/**/*',
-  'tasks/**/*',
   'test/**/*'
 ]
 
