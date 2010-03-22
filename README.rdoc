@@ -12,7 +12,7 @@ Install aws-s3 library
 
   gem install aws-s3
   
-== Create the backup rake tasks, config file, and initializer.
+Create the backup rake tasks, config file, and initializer.
 
   script/generate assets_backup
 
@@ -33,8 +33,6 @@ Optionally setup cron to do your backups with the following crontab
 If you ever need to restore the production database, use the tool of your choice to download the backup from S3 and run.
 
   gzip -dc production_dump-YYYY-MM-DD_HH-MM-SS.sql.gz | mysql -u root -p <production database>
-
-Copyright (c) 2010 Chris Barnes, released under the MIT license
   
 == Troubleshooting and FAQs
 
