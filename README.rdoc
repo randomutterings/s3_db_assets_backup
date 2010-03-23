@@ -42,14 +42,10 @@ You need to create a tmp directory in the root.
 
   mkdir tmp
 
-<b>Another problem?</b>
-
-Make sure you're using Rails 2.3.5.
-
 
 == Found a bug?
 
-If you are having a problem with the site, first look at the FAQs above. If you still cannot resolve it, please submit an issue here.
+If you are having a problem with the plugin, first look at the FAQs above. If you still cannot resolve it, please submit an issue here.
 
 http://github.com/randomutterings/s3_db_assets_backup/issues
 
