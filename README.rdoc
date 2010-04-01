@@ -5,8 +5,6 @@ Generates rake tasks for backing up your database and public folder (which shoul
 == Install
 
   script/plugin install git://github.com/randomutterings/s3_db_assets_backup.git
-  
-Edit config/assets_backup_config.yml with your aws credentials.
 
 Install aws-s3 library
 
@@ -15,6 +13,8 @@ Install aws-s3 library
 Create the backup rake tasks, config file, and initializer.
 
   script/generate assets_backup
+
+Edit config/assets_backup_config.yml with your aws credentials.
 
 Backup the production database.
 
