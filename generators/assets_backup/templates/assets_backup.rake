@@ -8,7 +8,7 @@ namespace :assets do
     AWS::S3::Base.establish_connection!(:access_key_id => APP_CONFIG['access_key_id'], :secret_access_key => APP_CONFIG['secret_access_key'])
     BUCKET = APP_CONFIG['bucket']
 
-    datestamp = Time.now.strftime("%Y-%m-%d_%H-%M-%S")
+    datestamp = Time.now.strftime("%Y-%m-%d-%H-%M-%S")
     base_path = ENV["RAILS_ROOT"] || "." 
     file_name = "assets-#{datestamp}.tgz" 
     backup_file = File.join(base_path, "tmp", file_name)

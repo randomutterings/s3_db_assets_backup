@@ -32,11 +32,11 @@ Optionally setup cron to do your backups with the following crontab
 
 If you ever need to restore the production database, use the tool of your choice to download the backup from S3 and run.
 
-  gzip -dc production_dump-YYYY-MM-DD_HH-MM-SS.sql.gz | mysql -u root -p <production database>
+  gzip -dc production_dump-YYYY-MM-DD-HH-MM-SS.sql.gz | mysql -u root -p <production database>
   
 == Troubleshooting and FAQs
 
-<b>I get "cannot create ./tmp/production_dump-YYYY-MM-DD_HH-MM-SS.sql.gz: Directory nonexistent" when running the database backup to S3</b>
+<b>I get "cannot create ./tmp/production_dump-YYYY-MM-DD-HH-MM-SS.sql.gz: Directory nonexistent" when running the database backup to S3</b>
 
 You need to create a tmp directory in the root.
 
