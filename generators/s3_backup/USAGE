@@ -2,7 +2,7 @@ Description:
     generates backup rake tasks, config yaml file, and initializer
 
 Example:
-    ./script/generate assets_backup
+    ./script/generate s3_backup
 
     This will create:
         lib/tasks/assets_backup.rake

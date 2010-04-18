@@ -1,4 +1,4 @@
-class AssetsBackupGenerator < Rails::Generator::Base
+class S3BackupGenerator < Rails::Generator::Base
   def manifest
     record do |m|
       m.file "assets_backup_config.yml", "config/assets_backup_config.yml"
