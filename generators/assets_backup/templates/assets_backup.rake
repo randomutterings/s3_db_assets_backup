@@ -28,3 +28,48 @@ namespace :assets do
     puts "Deleted #{unwanted_backups.length} backups, #{all_backups.length - unwanted_backups.length} backups available" 
   end
 end
+
+namespace :assets do
+  desc "Restore the public folder from an available backup." 
+  task :restore => [:environment] do
+    base_path = ENV["RAILS_ROOT"] || "." 
+    AWS::S3::Base.establish_connection!(:access_key_id => APP_CONFIG['access_key_id'], :secret_access_key => APP_CONFIG['secret_access_key'])
+    bucket_name = APP_CONFIG['bucket']
+    backups = AWS::S3::Bucket.objects(bucket_name)
+    if backups.size == 0
+      puts "no backups available, check your settings in config/assets_backup_config.yml"
+    else
+      puts "#{backups.size} backups are available..."
+      counter = 0
+      backups.each do |backup|
+        puts "[#{counter}] #{backup.key}"
+        counter += 1
+      end
+      if backups.size == 1
+        puts "Which backup should we restore? [0]"
+      else
+        puts "Which backup should we restore? [0-#{backups.size - 1}]"
+      end
+      STDOUT.flush()
+      selected = STDIN.gets.chomp.to_i
+      if backups.at(selected).nil?
+        puts "Backup not found, aborting"
+      else
+        file_name = backups.at(selected).key
+        backup_file = File.join(base_path, file_name)
+        destination = File.join(base_path, "public")
+        puts "downloading backup..."
+        open(backup_file, 'w') do |file|
+          AWS::S3::S3Object.stream(file_name, bucket_name) do |chunk|
+            file.write chunk
+          end
+        end
+        FileUtils.remove_dir(destination)
+        sh "tar zxfv #{backup_file}"
+        puts "cleaning up..."
+        FileUtils.rm_rf(backup_file)
+        puts "Finished"
+      end
+    end
+  end
+end
