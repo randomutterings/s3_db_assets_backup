@@ -18,7 +18,7 @@ Create the backup rake tasks, config file, and initializer.
 
   script/generate s3_backup
 
-Edit config/assets_backup_config.yml with your aws credentials.
+Edit config/s3_backup_config.yml with your aws credentials.
 
 == Usage
 

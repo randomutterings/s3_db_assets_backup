@@ -8,7 +8,7 @@ class S3DbAssetsBackupTest < Test::Unit::TestCase
     # creates all dirs down to initializers and tasks
     FileUtils.mkdir_p(initializers_dir)
     FileUtils.mkdir_p(tasks_dir)
-    Rails::Generator::Scripts::Generate.new.run(["assets_backup"], :destination => fake_rails_root)
+    Rails::Generator::Scripts::Generate.new.run(["s3_backup"], :destination => fake_rails_root)
   end
 
   def teardown
@@ -16,11 +16,11 @@ class S3DbAssetsBackupTest < Test::Unit::TestCase
   end
 
   def test_generates_backup_config_yaml_file
-    assert_generated_file("config/assets_backup_config.yml")
+    assert_generated_file("config/s3_backup_config.yml")
   end
   
   def test_generates_backup_config_initializer
-    assert_generated_file("config/initializers/load_assets_backup_config.rb")
+    assert_generated_file("config/initializers/load_s3_backup_config.rb")
   end
   
   def test_generates_assets_backup_rake_task

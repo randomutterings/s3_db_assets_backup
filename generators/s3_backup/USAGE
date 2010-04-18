@@ -7,5 +7,5 @@ Example:
     This will create:
         lib/tasks/assets_backup.rake
         lib/tasks/db_backup.rake
-        config/assets_backup_config.yml
-        config/initializers/load_assets_backup_config.rb
+        config/s3_backup_config.yml
+        config/initializers/load_s3_backup_config.rb

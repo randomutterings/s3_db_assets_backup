@@ -39,7 +39,7 @@ namespace :db do
     bucket_name = S3_CONFIG['bucket']
     backups = AWS::S3::Bucket.objects(bucket_name)
     if backups.size == 0
-      puts "no backups available, check your settings in config/assets_backup_config.yml"
+      puts "no backups available, check your settings in config/s3_backup_config.yml"
     else
       puts "#{backups.size} backups are available..."
       counter = 0
