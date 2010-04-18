@@ -5,8 +5,8 @@ require 'aws/s3'
 namespace :db do
   desc "Backup the database to a file. Options: RAILS_ENV=production" 
   task :backup => [:environment] do
-    AWS::S3::Base.establish_connection!(:access_key_id => APP_CONFIG['access_key_id'], :secret_access_key => APP_CONFIG['secret_access_key'])
-    BUCKET = APP_CONFIG['bucket']
+    AWS::S3::Base.establish_connection!(:access_key_id => S3_CONFIG['access_key_id'], :secret_access_key => S3_CONFIG['secret_access_key'])
+    BUCKET = S3_CONFIG['bucket']
 
     datestamp = Time.now.strftime("%Y-%m-%d-%H-%M-%S")
     base_path = ENV["RAILS_ROOT"] || "." 
@@ -20,7 +20,7 @@ namespace :db do
 
     bucket = AWS::S3::Bucket.find(BUCKET)
     all_backups = bucket.objects.select { |f| f.key.match(/dump/) }.sort { |a,b| a.key <=> b.key }.reverse
-    max_backups = APP_CONFIG['database_backups_to_keep'].to_i || 28
+    max_backups = S3_CONFIG['database_backups_to_keep'].to_i || 28
     unwanted_backups = all_backups[max_backups..-1] || []
     for unwanted_backup in unwanted_backups
       unwanted_backup.delete
@@ -35,8 +35,8 @@ namespace :db do
   task :restore => [:environment] do
     base_path = ENV["RAILS_ROOT"] || "." 
     db_config = ActiveRecord::Base.configurations[RAILS_ENV]
-    AWS::S3::Base.establish_connection!(:access_key_id => APP_CONFIG['access_key_id'], :secret_access_key => APP_CONFIG['secret_access_key'])
-    bucket_name = APP_CONFIG['bucket']
+    AWS::S3::Base.establish_connection!(:access_key_id => S3_CONFIG['access_key_id'], :secret_access_key => S3_CONFIG['secret_access_key'])
+    bucket_name = S3_CONFIG['bucket']
     backups = AWS::S3::Bucket.objects(bucket_name)
     if backups.size == 0
       puts "no backups available, check your settings in config/assets_backup_config.yml"
