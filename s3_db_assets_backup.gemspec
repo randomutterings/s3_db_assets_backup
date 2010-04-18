@@ -9,7 +9,7 @@ PKG_FILES = FileList[
 
 spec = Gem::Specification.new do |s|
   s.name = "s3_db_assets_backup"
-  s.version = "0.0.5"
+  s.version = "0.0.6"
   s.author = "Chris Barnes"
   s.email = "randomutterings@gmail.com"
   s.homepage = "http://www.randomutterings.com/projects/s3_db_assets_backup"
