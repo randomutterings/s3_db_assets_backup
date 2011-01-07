@@ -13,7 +13,7 @@ Then run
 
   bundle install
 
-Create the backup rake tasks, config file, and initializer.
+Create the config file.
 
   rails g s3_backup
 
