@@ -4,11 +4,7 @@ Generates rake tasks for backing up and restoring your database and public folde
 
 == Install
 
-  script/plugin install git://github.com/randomutterings/s3_db_assets_backup.git
-
-or
-
-  gem install s3_db_assets_backup
+  script/plugin install git://github.com/randomutterings/s3_db_assets_backup.git -r rails_2.x
 
 Install aws-s3 library
 
@@ -54,6 +50,12 @@ You need to create a tmp directory in the project root.
 
   mkdir tmp
 
+<b>When running script/generate s3_backup I get "No such file or directory - /home/ubuntu/cotr/lib/tasks/assets_backup.rake"</b>
+
+You need to create a tasks directory inside your lib directory
+
+  mkdir lib/tasks
+  
 == Found a bug?
 
 If you are having a problem with the plugin, first look at the FAQs above. If you still cannot resolve it, please submit an issue here.
