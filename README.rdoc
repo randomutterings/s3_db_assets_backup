@@ -4,21 +4,22 @@ Generates rake tasks for backing up and restoring your database and public folde
 
 == Install
 
-  script/plugin install git://github.com/randomutterings/s3_db_assets_backup.git
+Edit your Gemfile to include the following
 
-or
-
-  gem install s3_db_assets_backup
-
-Install aws-s3 library
-
-  gem install aws-s3
+  gem "s3_db_assets_backup"
+  gem "aws-s3"
   
+Then run
+
+  bundle install
+
 Create the backup rake tasks, config file, and initializer.
 
-  script/generate s3_backup
+  rails g s3_backup
 
 Edit config/s3_backup_config.yml with your aws credentials.
+
+Rails 2.x (switch to the rails_2.x branch)
 
 == Usage
 
@@ -54,12 +55,12 @@ You need to create a tmp directory in the project root.
 
   mkdir tmp
 
+<b>I get "broken pipe" when running the backup</b>
+
+You need to create the S3 bucket you're trying to backup to.
+
 == Found a bug?
 
 If you are having a problem with the plugin, first look at the FAQs above. If you still cannot resolve it, please submit an issue here.
 
 http://github.com/randomutterings/s3_db_assets_backup/issues
-
-== Rails 3
-
-This project does not yet officially work with Rails 3.

@@ -1,5 +1,5 @@
 require 'find'
-require 'ftools'
+require 'fileutils'
 require 'aws/s3'
 
 namespace :db do

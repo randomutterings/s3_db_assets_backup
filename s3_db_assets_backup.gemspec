@@ -1,17 +1,16 @@
 require 'rake/gempackagetask'
 
-PKG_FILES = FileList[
-  '[a-zA-Z]*',
-  'generators/**/*',
-  'lib/**/*',
-  'test/**/*'
+PKG_FILES = FileList[  
+  '{lib}/**/*', 
+  '{app}/**/*',
+  '{config}/**/*'
 ]
 
 spec = Gem::Specification.new do |s|
   s.name = "s3_db_assets_backup"
-  s.version = "0.0.7"
+  s.version = "0.1.0"
   s.author = "Chris Barnes"
-  s.email = "randomutterings@gmail.com"
+  s.email = "chris@randomutterings.com"
   s.homepage = "http://www.randomutterings.com/projects/s3_db_assets_backup"
   s.platform = Gem::Platform::RUBY
   s.summary = "Generates rake tasks for backing up and restoring db and public folder to and from an existing S3 bucket"
