@@ -47,6 +47,14 @@ Optionally setup cron to do your backups with the following crontab
   # asset backup every wednesday at 11:30
   30 23 * * 3  cd /path/to/your/project && /var/lib/gems/1.8/bin/rake assets:backup
   
+Running RVM and Ruby 1.9.2, I had to setup cron like this (rvm is loaded in .profile).
+
+  SHELL=/bin/bash
+  HOME=/home/ubuntu
+
+  # db backup every day at 11:01
+  01 23 * * * source ~/.profile && cd /home/ubuntu/cpos && rake db:backup RAILS_ENV=production
+  
 == Troubleshooting and FAQs
 
 <b>I get "cannot create ./tmp/production_dump-YYYY-MM-DD-HH-MM-SS.sql.gz: Directory nonexistent" when running the database backup to S3</b>
