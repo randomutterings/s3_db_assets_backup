@@ -60,7 +60,7 @@ namespace :db do
         file_name = backups.at(selected).key
         backup_file = File.join(base_path, "tmp", file_name)
         puts "downloading backup..."
-        open(backup_file, 'w') do |file|
+        open(backup_file, 'w:utf-8') do |file|
           AWS::S3::S3Object.stream(file_name, bucket_name) do |chunk|
             file.write chunk
           end
