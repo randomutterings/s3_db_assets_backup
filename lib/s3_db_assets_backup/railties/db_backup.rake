@@ -13,7 +13,7 @@ namespace :db do
     file_name = "#{RAILS_ENV}_dump-#{datestamp}.sql.gz" 
     backup_file = File.join(base_path, "tmp", file_name)
     db_config = ActiveRecord::Base.configurations[RAILS_ENV]
-    sh "mysqldump -u #{db_config['username']} -p#{db_config['password']} -Q --add-drop-table -O add-locks=FALSE -O lock-tables=FALSE #{db_config['database']} | gzip -c > #{backup_file}" 
+    sh "mysqldump -u #{db_config['username']} -p#{db_config['password']} --default-character-set=latin1 -N -Q --add-drop-table add-locks=FALSE lock-tables=FALSE #{db_config['database']} | gzip -c > #{backup_file}" 
     AWS::S3::S3Object.store(file_name, open(backup_file), BUCKET)
     puts "Created backup: #{file_name}" 
     FileUtils.rm_rf(backup_file)
@@ -66,7 +66,7 @@ namespace :db do
           end
         end
         puts "download complete, restoring to #{RAILS_ENV} database"
-        sh "gzip -dc #{backup_file} | mysql -u #{db_config['username']} -p#{db_config['password']} #{db_config['database']}"
+        sh "gzip -dc #{backup_file} | mysql -u #{db_config['username']} -p#{db_config['password']} #{db_config['database']} --default-character-set=latin1 -N"
         puts "cleaning up..."
         FileUtils.rm_rf(backup_file)
         puts "Finished"
