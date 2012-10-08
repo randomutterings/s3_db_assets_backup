@@ -1,6 +1,6 @@
-config_file = "#{RAILS_ROOT}/config/s3_backup_config.yml"
+config_file = "#{Rails.root.to_s}/config/s3_backup_config.yml"
 if FileTest.exists?(config_file)
-  S3_CONFIG = YAML.load_file(config_file)[RAILS_ENV].symbolize_keys
+  S3_CONFIG = YAML.load_file(config_file)[Rails.env].symbolize_keys
 else
-  raise "Can't find s3_backup_config.yml"
+  puts "WARNING: Can't find s3_backup_config.yml"
 end

@@ -1,4 +1,4 @@
-require 'rake/gempackagetask'
+require 'rubygems/package_task'
 
 PKG_FILES = FileList[  
   '{lib}/**/*', 
