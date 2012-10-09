@@ -13,6 +13,7 @@ namespace :assets do
     file_name = "assets-#{datestamp}.tgz" 
     backup_file = File.join(base_path, "tmp", file_name)
     sh "tar -cvzpf #{backup_file} public"
+    
     AWS::S3::S3Object.store(file_name, open(backup_file), BUCKET)
     puts "Created backup: #{file_name}" 
     FileUtils.rm_rf(backup_file)
@@ -59,7 +60,7 @@ namespace :assets do
         backup_file = File.join(base_path, file_name)
         destination = File.join(base_path, "public")
         puts "downloading backup..."
-        open(backup_file, 'w') do |file|
+        open(backup_file).read.force_encoding('utf-8') do |file|
           AWS::S3::S3Object.stream(file_name, bucket_name) do |chunk|
             file.write chunk
           end
