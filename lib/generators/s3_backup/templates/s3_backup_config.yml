@@ -23,3 +23,18 @@ production:
   # the database and public folder
   database_backups_to_keep: 8
   assets_backups_to_keep: 3
+
+email_config:
+  # email address that will receive email reports
+  to: report_receiver@domain.com
+
+  # server settings that Pony will use to send emails
+  via: :smtp
+  subject: <MYSITE> Backup Report
+  address: smtp_server_address
+  port: '587'
+  enable_starttls_auto: true
+  user_name: email_user_name
+  password: email_password
+  authentication: :plain
+  domain: HELO

@@ -1,13 +1,12 @@
 = S3DbAssetsBackup
 
-Generates rake tasks for backing up and restoring your database and public folder (which should also contain any uploaded assets) to and from an existing bucket in your Amazon S3 account.  The rake tasks compresses and uploads each backup with a time stamp and the config file allows you to set how many of each backup to keep.  This plugin is based on (http://www.magnionlabs.com/2009/7/7/db-backups).
+Generates rake tasks for backing up and restoring your database and public folder (which should also contain any uploaded assets) to and from an existing bucket in your Amazon S3 account.  The rake tasks compresses and uploads each backup with a time stamp and the config file allows you to set how many of each backup to keep.  Additionally, the plugin can be configured to generate and send a backup status report via email.
 
 == Install
 
-Edit your Gemfile to include the following
+Edit your Gemfile to include
 
   gem "s3_db_assets_backup"
-  gem "aws-s3"
   
 Then run
 
@@ -17,7 +16,7 @@ Create the config file.
 
   rails g s3_backup
 
-Edit config/s3_backup_config.yml with your aws credentials.
+Edit config/s3_backup_config.yml with your aws credentials and email settings
 
 Rails 2.x (switch to the rails_2.x branch)
 
@@ -39,21 +38,37 @@ Restore the public folder (you will be prompted to select an existing backup)
 
   rake assets:restore
 
-Optionally setup cron to do your backups with the following crontab
-  
-  # db backup every day at 11:01
-  1 23 * * *  cd /path/to/your/project && /var/lib/gems/1.8/bin/rake db:backup RAILS_ENV=production
-  
-  # asset backup every wednesday at 11:30
-  30 23 * * 3  cd /path/to/your/project && /var/lib/gems/1.8/bin/rake assets:backup
-  
-Running RVM and Ruby 1.9.2, I had to setup cron like this (rvm is loaded in .profile).
+Send a backup status report to the configured email address
 
-  SHELL=/bin/bash
-  HOME=/home/ubuntu
+  rake db:backup:status
 
-  # db backup every day at 11:01
-  01 23 * * * source ~/.profile && cd /home/ubuntu/cpos && rake db:backup RAILS_ENV=production
+== Scheduling with whenever
+
+Optionally, you can use "whenever" to automate backups and status reports. 
+
+Add whenever to your Gemfile
+
+  gem 'whenever', :require => false
+
+To create the whenever config file, run the following command from the app root directory.
+
+  wheneverize .
+
+Edit config/schedule.rb to schedule the rake tasks.
+
+  every 12.hours do
+    rake "db:backup"
+  end
+  
+  every 4.days do
+    rake "db:backup:status"
+  end
+
+Then run the following command to write the config to your cron file
+
+  whenever -w
+
+For more information on the whenever gem, visit https://github.com/javan/whenever
   
 == Troubleshooting and FAQs
 
@@ -66,6 +81,10 @@ You need to create a tmp directory in the project root.
 <b>I get "broken pipe" when running the backup</b>
 
 You need to create the S3 bucket you're trying to backup to.
+
+<b>My crontab doesn't run in development.</b>
+
+Deving on a mac?  Cron is deprecated in Mountain Lion.
 
 == Found a bug?
 
