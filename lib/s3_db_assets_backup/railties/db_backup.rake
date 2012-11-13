@@ -2,6 +2,7 @@ require 'find'
 require 'fileutils'
 require 'aws/s3'
 require 'pony'
+require 'unit_converter'
 
 namespace :db do
   desc "Backup the database to a file. Options: RAILS_ENV=production" 
@@ -91,11 +92,14 @@ namespace :db do
       AWS::S3::Base.establish_connection!(:access_key_id => S3_CONFIG[:access_key_id], :secret_access_key => S3_CONFIG[:secret_access_key])
       BUCKET = S3_CONFIG[:bucket]
       bucket = AWS::S3::Bucket.find(BUCKET)
-      all_backups = bucket.objects.select { |f| f.key.match(/dump/) }.sort { |a,b| a.key <=> b.key }.reverse
-
-      message = "Archive contains the following backups:\n\n"
-      all_backups.each { |f| message << f.key + "\n" }
+      backups = bucket.objects.select { |f| f.key.match(/dump/) }.sort { |a,b| a.key <=> b.key }.reverse
       email = EMAIL_CONFIG
+      message = "Archive contains the following backups:\n\n"
+
+      backups.each do |file|
+        file_size = number_to_human_size(file.content_length.to_i)
+        message << "#{file.key} (#{file_size})\n"
+      end
 
       Pony.mail(  
         :to => email[:to], 
