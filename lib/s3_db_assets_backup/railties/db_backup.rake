@@ -1,15 +1,16 @@
 require 'find'
 require 'fileutils'
-require 'aws/s3'
+require 'aws-sdk'
 require 'pony'
 require 'unit_converter'
 
 namespace :db do
   desc "Backup the database to a file. Options: RAILS_ENV=production" 
   task :backup => [:environment] do
-    # Establish connection to Amazon S3 and fetch the bucket name from the config
-    AWS::S3::Base.establish_connection!(:access_key_id => S3_CONFIG[:access_key_id], :secret_access_key => S3_CONFIG[:secret_access_key])
-    BUCKET = S3_CONFIG[:bucket]
+    
+    # establish a connection and create the s3 bucket
+    s3 = AWS::S3.new
+    bucket = s3.buckets.create(S3_CONFIG[:bucket])
 
     # Build the backup directory and filename
     datestamp = Time.now.strftime("%Y-%m-%d-%H-%M-%S")
@@ -22,13 +23,17 @@ namespace :db do
     sh "mysqldump -u #{db_config['username']} -p#{db_config['password']} --default-character-set=latin1 -N -Q --add-drop-table #{db_config['database']} | gzip -c > #{backup_file}" 
     
     # Upload the backup file to Amazon and remove the file from the local filesystem
-    AWS::S3::S3Object.store(file_name, open(backup_file), BUCKET)
-    puts "Created backup: #{file_name}" 
+    basename = File.basename(file_name)
+    object = bucket.objects[basename]
+    object.write(:file => backup_file)
+
+    puts "Uploaded #{file_name} to:"
+    puts object.public_url
+
     FileUtils.rm_rf(backup_file)
 
     # Check the bucket for the number of backups and remove the oldest backups if
     # it is over the number of backups sets configured
-    bucket = AWS::S3::Bucket.find(BUCKET)
     all_backups = bucket.objects.select { |f| f.key.match(/dump/) }.sort { |a,b| a.key <=> b.key }.reverse
     max_backups = S3_CONFIG[:database_backups_to_keep].to_i || 28
     unwanted_backups = all_backups[max_backups..-1] || []
@@ -45,9 +50,12 @@ namespace :db do
   task :restore => [:environment] do
     base_path = ENV["RAILS_ROOT"] || "." 
     db_config = ActiveRecord::Base.configurations[Rails.env]
-    AWS::S3::Base.establish_connection!(:access_key_id => S3_CONFIG[:access_key_id], :secret_access_key => S3_CONFIG[:secret_access_key])
-    bucket_name = S3_CONFIG[:bucket]
-    backups = AWS::S3::Bucket.objects(bucket_name).select { |f| f.key.match(/dump/) }
+    
+    # establish a connection and find the s3 bucket
+    s3 = AWS::S3.new
+    bucket = s3.buckets[S3_CONFIG[:bucket]]
+
+    backups = bucket.objects.select { |f| f.key.match(/dump/) }
     if backups.size == 0
       puts "no backups available, check your settings in config/s3_backup_config.yml"
     else
@@ -67,11 +75,11 @@ namespace :db do
       if backups.at(selected).nil?
         puts "Backup not found, aborting"
       else
-        file_name = backups.at(selected).key
-        backup_file = File.join(base_path, "tmp", file_name)
+        backup = backups.at(selected)
+        backup_file = File.join(base_path, "tmp", backup.key)
         puts "downloading backup..."
         open(backup_file, 'wb') do |file|
-          AWS::S3::S3Object.stream(file_name, bucket_name) do |chunk|
+          backup.read do |chunk|
             file.write chunk
           end
         end
@@ -89,9 +97,11 @@ namespace :db do
   namespace :backup do
     desc "Email a report of current backups."
     task :status => [:environment] do
-      AWS::S3::Base.establish_connection!(:access_key_id => S3_CONFIG[:access_key_id], :secret_access_key => S3_CONFIG[:secret_access_key])
-      BUCKET = S3_CONFIG[:bucket]
-      bucket = AWS::S3::Bucket.find(BUCKET)
+      
+      # establish a connection and find the s3 bucket
+      s3 = AWS::S3.new
+      bucket = s3.buckets[S3_CONFIG[:bucket]]
+
       backups = bucket.objects.select { |f| f.key.match(/dump/) }.sort { |a,b| a.key <=> b.key }.reverse
       email = EMAIL_CONFIG
       message = "Archive contains the following backups:\n\n"

@@ -5,20 +5,29 @@ require 'aws/s3'
 namespace :assets do
   desc "Backup everything in the public folder." 
   task :backup => [:environment] do
-    AWS::S3::Base.establish_connection!(:access_key_id => S3_CONFIG[:access_key_id], :secret_access_key => S3_CONFIG[:secret_access_key])
-    BUCKET = S3_CONFIG[:bucket]
 
+    # establish a connection and create the s3 bucket
+    s3 = AWS::S3.new
+    bucket = s3.buckets.create(S3_CONFIG[:bucket])
+
+    # Build the backup directory and filename
     datestamp = Time.now.strftime("%Y-%m-%d-%H-%M-%S")
     base_path = ENV["RAILS_ROOT"] || "." 
-    file_name = "assets-#{datestamp}.tgz" 
+    file_name = "#{Rails.env}_assets-#{datestamp}.sql.gz" 
     backup_file = File.join(base_path, "tmp", file_name)
+    
     sh "tar -cvzpf #{backup_file} public"
     
-    AWS::S3::S3Object.store(file_name, open(backup_file), BUCKET)
-    puts "Created backup: #{file_name}" 
+    # Upload the backup file to Amazon and remove the file from the local filesystem
+    basename = File.basename(file_name)
+    object = bucket.objects[basename]
+    object.write(:file => backup_file)
+
+    puts "Uploaded #{file_name} to:"
+    puts object.public_url
+
     FileUtils.rm_rf(backup_file)
 
-    bucket = AWS::S3::Bucket.find(BUCKET)
     all_backups = bucket.objects.select { |f| f.key.match(/assets/) }.sort { |a,b| a.key <=> b.key }.reverse
     max_backups = S3_CONFIG[:assets_backups_to_keep].to_i || 28
     unwanted_backups = all_backups[max_backups..-1] || []
@@ -34,9 +43,12 @@ namespace :assets do
   desc "Restore the public folder from an available backup." 
   task :restore => [:environment] do
     base_path = ENV["RAILS_ROOT"] || "." 
-    AWS::S3::Base.establish_connection!(:access_key_id => S3_CONFIG[:access_key_id], :secret_access_key => S3_CONFIG[:secret_access_key])
-    bucket_name = S3_CONFIG[:bucket]
-    backups = AWS::S3::Bucket.objects(bucket_name).select { |f| f.key.match(/assets/) }
+    
+    # establish a connection and find the s3 bucket
+    s3 = AWS::S3.new
+    bucket = s3.buckets[S3_CONFIG[:bucket]]
+
+    backups = bucket.objects.select { |f| f.key.match(/assets/) }
     if backups.size == 0
       puts "no backups available, check your settings in config/s3_backup_config.yml"
     else
@@ -56,12 +68,12 @@ namespace :assets do
       if backups.at(selected).nil?
         puts "Backup not found, aborting"
       else
-        file_name = backups.at(selected).key
-        backup_file = File.join(base_path, file_name)
+        backup = backups.at(selected)
+        backup_file = File.join(base_path, "tmp", backup.key)
         destination = File.join(base_path, "public")
         puts "downloading backup..."
-        open(backup_file).read.force_encoding('utf-8') do |file|
-          AWS::S3::S3Object.stream(file_name, bucket_name) do |chunk|
+        open(backup_file, 'wb') do |file|
+          backup.read do |chunk|
             file.write chunk
           end
         end
