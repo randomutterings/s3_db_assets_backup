@@ -43,9 +43,7 @@ namespace :db do
     end
     puts "Deleted #{unwanted_backups.length} backups, #{all_backups.length - unwanted_backups.length} backups available" 
   end
-end
 
-namespace :db do
   desc "Restore the database from an available backup. Options: RAILS_ENV=production" 
   task :restore => [:environment] do
     base_path = ENV["RAILS_ROOT"] || "." 
@@ -91,9 +89,7 @@ namespace :db do
       end
     end
   end
-end
 
-namespace :db do
   namespace :backup do
     desc "Email a report of current backups."
     task :status => [:environment] do

@@ -37,9 +37,7 @@ namespace :assets do
     end
     puts "Deleted #{unwanted_backups.length} backups, #{all_backups.length - unwanted_backups.length} backups available" 
   end
-end
 
-namespace :assets do
   desc "Restore the public folder from an available backup." 
   task :restore => [:environment] do
     base_path = ENV["RAILS_ROOT"] || "." 
