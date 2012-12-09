@@ -78,10 +78,6 @@ You need to create a tmp directory in the project root.
 
   mkdir tmp
 
-<b>I get "broken pipe" when running the backup</b>
-
-You need to create the S3 bucket you're trying to backup to.
-
 <b>My crontab doesn't run in development.</b>
 
 Deving on a mac?  Cron is deprecated in Mountain Lion.
