@@ -3,21 +3,22 @@ require 'fileutils'
 require 'aws/s3'
 
 namespace :assets do
-  desc "Backup everything in the public folder." 
+  desc "Backup everything in the public folder."
   task :backup => [:environment] do
 
     # establish a connection and create the s3 bucket
+    AWS.config(S3_CONFIG)
     s3 = AWS::S3.new
     bucket = s3.buckets.create(S3_CONFIG[:bucket])
 
     # Build the backup directory and filename
     datestamp = Time.now.strftime("%Y-%m-%d-%H-%M-%S")
-    base_path = ENV["RAILS_ROOT"] || "." 
-    file_name = "#{Rails.env}_assets-#{datestamp}.sql.gz" 
+    base_path = ENV["RAILS_ROOT"] || "."
+    file_name = "#{Rails.env}_assets-#{datestamp}.sql.gz"
     backup_file = File.join(base_path, "tmp", file_name)
-    
+
     sh "tar -cvzpf #{backup_file} public"
-    
+
     # Upload the backup file to Amazon and remove the file from the local filesystem
     basename = File.basename(file_name)
     object = bucket.objects[basename]
@@ -33,16 +34,17 @@ namespace :assets do
     unwanted_backups = all_backups[max_backups..-1] || []
     for unwanted_backup in unwanted_backups
       unwanted_backup.delete
-      puts "deleted #{unwanted_backup.key}" 
+      puts "deleted #{unwanted_backup.key}"
     end
-    puts "Deleted #{unwanted_backups.length} backups, #{all_backups.length - unwanted_backups.length} backups available" 
+    puts "Deleted #{unwanted_backups.length} backups, #{all_backups.length - unwanted_backups.length} backups available"
   end
 
-  desc "Restore the public folder from an available backup." 
+  desc "Restore the public folder from an available backup."
   task :restore => [:environment] do
-    base_path = ENV["RAILS_ROOT"] || "." 
-    
+    base_path = ENV["RAILS_ROOT"] || "."
+
     # establish a connection and find the s3 bucket
+    AWS.config(S3_CONFIG)
     s3 = AWS::S3.new
     bucket = s3.buckets[S3_CONFIG[:bucket]]
 

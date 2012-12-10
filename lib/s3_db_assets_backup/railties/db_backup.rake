@@ -5,23 +5,24 @@ require 'pony'
 require 'unit_converter'
 
 namespace :db do
-  desc "Backup the database to a file. Options: RAILS_ENV=production" 
+  desc "Backup the database to a file. Options: RAILS_ENV=production"
   task :backup => [:environment] do
-    
+
     # establish a connection and create the s3 bucket
+    AWS.config(S3_CONFIG)
     s3 = AWS::S3.new
     bucket = s3.buckets.create(S3_CONFIG[:bucket])
 
     # Build the backup directory and filename
     datestamp = Time.now.strftime("%Y-%m-%d-%H-%M-%S")
-    base_path = ENV["RAILS_ROOT"] || "." 
-    file_name = "#{Rails.env}_dump-#{datestamp}.sql.gz" 
+    base_path = ENV["RAILS_ROOT"] || "."
+    file_name = "#{Rails.env}_dump-#{datestamp}.sql.gz"
     backup_file = File.join(base_path, "tmp", file_name)
 
     # Load database configuration and dump the sql database to the backup file
     db_config = ActiveRecord::Base.configurations[Rails.env]
-    sh "mysqldump -u #{db_config['username']} -p#{db_config['password']} --default-character-set=latin1 -N -Q --add-drop-table #{db_config['database']} | gzip -c > #{backup_file}" 
-    
+    sh "mysqldump -u #{db_config['username']} -p#{db_config['password']} --default-character-set=latin1 -N -Q --add-drop-table #{db_config['database']} | gzip -c > #{backup_file}"
+
     # Upload the backup file to Amazon and remove the file from the local filesystem
     basename = File.basename(file_name)
     object = bucket.objects[basename]
@@ -39,17 +40,18 @@ namespace :db do
     unwanted_backups = all_backups[max_backups..-1] || []
     for unwanted_backup in unwanted_backups
       unwanted_backup.delete
-      puts "deleted #{unwanted_backup.key}" 
+      puts "deleted #{unwanted_backup.key}"
     end
-    puts "Deleted #{unwanted_backups.length} backups, #{all_backups.length - unwanted_backups.length} backups available" 
+    puts "Deleted #{unwanted_backups.length} backups, #{all_backups.length - unwanted_backups.length} backups available"
   end
 
-  desc "Restore the database from an available backup. Options: RAILS_ENV=production" 
+  desc "Restore the database from an available backup. Options: RAILS_ENV=production"
   task :restore => [:environment] do
-    base_path = ENV["RAILS_ROOT"] || "." 
+    base_path = ENV["RAILS_ROOT"] || "."
     db_config = ActiveRecord::Base.configurations[Rails.env]
-    
+
     # establish a connection and find the s3 bucket
+    AWS.config(S3_CONFIG)
     s3 = AWS::S3.new
     bucket = s3.buckets[S3_CONFIG[:bucket]]
 
@@ -93,8 +95,9 @@ namespace :db do
   namespace :backup do
     desc "Email a report of current backups."
     task :status => [:environment] do
-      
+
       # establish a connection and find the s3 bucket
+      AWS.config(S3_CONFIG)
       s3 = AWS::S3.new
       bucket = s3.buckets[S3_CONFIG[:bucket]]
 
@@ -107,9 +110,9 @@ namespace :db do
         message << "#{file.key} (#{file_size})\n"
       end
 
-      Pony.mail(  
-        :to => email[:to], 
-        :via => email[:via], 
+      Pony.mail(
+        :to => email[:to],
+        :via => email[:via],
         :subject => email[:subject],
         :body => message,
 
