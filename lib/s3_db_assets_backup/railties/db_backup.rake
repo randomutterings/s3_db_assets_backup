@@ -21,7 +21,7 @@ namespace :db do
 
     # Load database configuration and dump the sql database to the backup file
     db_config = ActiveRecord::Base.configurations[Rails.env]
-    sh "mysqldump -u #{db_config['username']} -p#{db_config['password']} --default-character-set=latin1 -N -Q --add-drop-table #{db_config['database']} | gzip -c > #{backup_file}"
+    sh "mysqldump -u #{db_config['username']} -p#{db_config['password']} -h #{db_config['host']} --default-character-set=latin1 -N -Q --add-drop-table #{db_config['database']} | gzip -c > #{backup_file}"
 
     # Upload the backup file to Amazon and remove the file from the local filesystem
     basename = File.basename(file_name)
